@@ -1,0 +1,9 @@
+[submodule "infoLink"]
+	path = repo/infolink
+	url = https://github.com/infolis/infoLink
+[submodule "infolis-web"]
+	path = repo/infolis-web
+	url = https://github.com/infolis/infolis-web
+[submodule "repo/infolis.github.io"]
+	path = repo/infolis.github.io
+	url = https://github.com/infolis/infolis.github.io

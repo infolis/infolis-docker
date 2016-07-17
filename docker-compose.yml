@@ -1,0 +1,38 @@
+version: '2'
+services:
+  mongo:
+    image: 'mongo:3.2'
+    container_name: 'infolis-mongo'
+    volumes: 
+      - './data/mongodb:/data/db'
+      - './backup:/backup'
+  infolis-web:
+    build: 'repo/infolis-web'
+    container_name: 'infolis-web-app'
+    depends_on:
+      - 'mongo'
+      - 'infolink'
+    environment:
+      MONGO_ADDR: 'infolis-mongo'
+      MONGO_PORT: '27017'
+      INFOLINK_ADDR: 'infolink'
+      INFOLINK_PORT: '8080'
+    ports:
+      - '3000:3000'
+    volumes:
+      - './config/infolis-web.coffee:/app/config.production.coffee'
+      - './data/logs:/app/logs'
+  infolink:
+    build: 'repo/infolink'
+    image: 'infolis/infolink'
+    container_name: 'infolink-app'
+    volumes:
+      - './config/infolink.properties:/etc/infolis-config.properties'
+      - './data/uploads:/infolis-files'
+  infolis-github:
+    build: 'repo/infolis.github.io'
+    container_name: 'infolis-github-app'
+    ports:
+      - '4000:4000'
+    volumes:
+      - './config/infolis-github.yml:/site/_config-dev.yml'
