@@ -1,4 +1,6 @@
 # Host and port of infolis-web
 baseurl_api: "http://localhost:3000"
+# baseurl_api: "http://infolis.gesis.org/infolink"
 # Host and port of infolis.github.io deploy
 url: "http://localhost:4000"
+# url: "http://infolis.github.io"

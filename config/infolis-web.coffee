@@ -28,9 +28,9 @@ process.env.INFOLINK_PORT or= '8080'
 
 module.exports =
 	basePath: ''
-	baseURI: 'http://localhost:3000'
-	site_api: 'http://localhost:3000'
-	site_github: 'http://localhost:4000'
+	baseURI: 'http://infolis-web:3000'
+	site_api: 'http://infolis-web:3000'
+	site_github: 'http://infolis-github:4000'
 	backendURI: "http://#{process.env.INFOLINK_ADDR}:#{process.env.INFOLINK_PORT}"
 	backendApiPath: 'infoLink-1.0/infolis-api'
 	mongoURI: "mongodb://#{process.env.MONGO_ADDR}:#{process.env.MONGO_PORT}/#{process.env.MONGO_DBNAME}"

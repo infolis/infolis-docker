@@ -54,7 +54,16 @@ docker-compose pull mongo
 
 ## Configure
 
-Adapt the files in [`./config`](./config) to your needs
+Adapt the files in [`./config`](./config) to your needs.
+
+If the host of the `infolis-web`/`infolis-github` containers is running on a
+non-DNS-resolvable host (e.g. `localhost:3000`), ensure that
+they are resolvable locally by adding to `/etc/hosts`:
+
+```
+127.0.0.1	infolis-web
+127.0.0.1	infolis-github
+```
 
 ## Run
 
