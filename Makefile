@@ -22,3 +22,9 @@ backup:
 		&& docker exec infolis-mongo mongodump --out /backup/$$now/mongodb \
 		&& cp -r data/uploads ./backup/$$now/uploads
 
+clear:
+	@echo -e "This will completely wipe all uploads and the DB.\n<CTRL-C> to cancel <Enter> to continue" \
+		&& read confirm\
+		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()" \
+		&& rm -rvf data/uploads/*
+
