@@ -4,6 +4,7 @@ services:
     image: 'mongo:3.2'
     container_name: 'infolis-mongo'
     volumes: 
+      - '/etc/localtime:/etc/localtime:ro'
       - './data/mongodb:/data/db'
       - './backup:/backup'
   infolis-web:
@@ -20,6 +21,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
+      - '/etc/localtime:/etc/localtime:ro'
       - './config/infolis-web.coffee:/app/config.production.coffee'
       - './data/logs:/app/logs'
   infolink:
@@ -27,6 +29,7 @@ services:
     image: 'infolis/infolink'
     container_name: 'infolink-app'
     volumes:
+      - '/etc/localtime:/etc/localtime:ro'
       - './config/infolink.properties:/etc/infolis-config.properties'
       - './data/uploads:/infolis-files'
   infolis-github:
