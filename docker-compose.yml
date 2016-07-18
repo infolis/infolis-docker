@@ -22,6 +22,8 @@ services:
     volumes:
       - './config/infolis-web.coffee:/app/config.production.coffee'
       - './data/logs:/app/logs'
+      # for development
+      - './repo/infolis-web/public:/app/public'
   infolink:
     build: 'repo/infolink'
     image: 'infolis/infolink'
