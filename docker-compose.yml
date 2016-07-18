@@ -4,8 +4,12 @@ services:
     image: 'mongo:3.2'
     container_name: 'infolis-mongo'
     volumes: 
+      - '/etc/localtime:/etc/localtime:ro'
       - './data/mongodb:/data/db'
       - './backup:/backup'
+    # for development
+    ports:
+      - '27018:27017'
   infolis-web:
     build: 'repo/infolis-web'
     container_name: 'infolis-web-app'
@@ -20,21 +24,25 @@ services:
     ports:
       - '3000:3000'
     volumes:
+      - '/etc/localtime:/etc/localtime:ro'
       - './config/infolis-web.coffee:/app/config.production.coffee'
       - './data/logs:/app/logs'
       # for development
+      - './repo/infolis-web/node_modules:/app/node_modules'
+      - './repo/infolis-web/src:/app/src'
       - './repo/infolis-web/public:/app/public'
   infolink:
     build: 'repo/infolink'
     image: 'infolis/infolink'
     container_name: 'infolink-app'
     volumes:
+      - '/etc/localtime:/etc/localtime:ro'
       - './config/infolink.properties:/etc/infolis-config.properties'
       - './data/uploads:/infolis-files'
-  infolis-github:
-    build: 'repo/infolis.github.io'
-    container_name: 'infolis-github-app'
-    ports:
-      - '4000:4000'
-    volumes:
-      - './config/infolis-github.yml:/site/_config-dev.yml'
+  # infolis-github:
+  #   build: 'repo/infolis.github.io'
+  #   container_name: 'infolis-github-app'
+  #   ports:
+  #     - '4000:4000'
+  #   volumes:
+  #     - './config/infolis-github.yml:/site/_config-dev.yml'
