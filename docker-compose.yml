@@ -31,6 +31,7 @@ services:
       - './repo/infolis-web/node_modules:/app/node_modules'
       - './repo/infolis-web/src:/app/src'
       - './repo/infolis-web/public:/app/public'
+      - './repo/infolis-web/views:/app/views'
   infolink:
     build: 'repo/infolink'
     image: 'infolis/infolink'
