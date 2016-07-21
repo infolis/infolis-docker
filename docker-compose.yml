@@ -21,6 +21,7 @@ services:
       MONGO_PORT: '27017'
       INFOLINK_ADDR: 'infolink'
       INFOLINK_PORT: '8080'
+    restart: always
     ports:
       - '3000:3000'
     volumes:
@@ -30,7 +31,7 @@ services:
       # for development
       - './repo/infolis-web/node_modules:/app/node_modules'
       - './repo/infolis-web/src:/app/src'
-      - './repo/infolis-web/data/infolis.tson:/app/data/infolis-tson'
+      - './repo/infolis-web/data/infolis.tson:/app/data/infolis.tson'
       - './repo/infolis-web/public:/app/public'
       - './repo/infolis-web/views:/app/views'
       - './repo/infolis-web/src-client:/app/src-client'
@@ -38,8 +39,8 @@ services:
     build: 'repo/infolink'
     image: 'infolis/infolink'
     container_name: 'infolink-app'
-    tempfs:
-      - '/tmp/infolis/cache'
+    tmpfs:
+      - '/tmp/infolis'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - './config/infolink.properties:/etc/infolis-config.properties'
