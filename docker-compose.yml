@@ -38,6 +38,8 @@ services:
     build: 'repo/infolink'
     image: 'infolis/infolink'
     container_name: 'infolink-app'
+    tempfs:
+      - '/tmp/infolis/cache'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - './config/infolink.properties:/etc/infolis-config.properties'
