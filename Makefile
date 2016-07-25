@@ -24,9 +24,17 @@ backup:
 
 dropIndexes:
 	docker exec infolis-mongo mongo infolis-web --eval \
-		"db.getCollectionNames().forEach(function(col) { \
-			db.runCommand({'dropIndexes': col, 'index': '*'}); \
-		});"
+	"db.getCollectionNames().forEach(function(col) { \
+		db.runCommand({'dropIndexes': col, 'index': '*'}); \
+	});"
+
+listIndexes:
+	docker exec infolis-mongo mongo infolis-web --eval \
+	"db.getCollectionNames().forEach(function(collection) { \
+		indexes = db[collection].getIndexes(); \
+		print('Indexes for ' + collection + ':'); \
+		printjson(indexes); \
+	});"
 
 restore:
 	@if [ -z "$$BACKUP" ];then echo "Usage: make restore BACKUP=<backup-timestamp>"; exit 1;fi
