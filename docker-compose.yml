@@ -10,6 +10,7 @@ services:
     # for development
     ports:
       - '27018:27017'
+    restart: always
   infolis-web:
     build: 'repo/infolis-web'
     container_name: 'infolis-web-app'
