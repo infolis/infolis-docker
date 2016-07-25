@@ -13,6 +13,7 @@ services:
     restart: always
   infolis-web:
     build: 'repo/infolis-web'
+    image: 'infolis/infolis-web'
     container_name: 'infolis-web-app'
     depends_on:
       - 'mongo'
