@@ -25,6 +25,14 @@ module.exports =
 	backendURI: "http://#{process.env.INFOLINK_ADDR}:#{process.env.INFOLINK_PORT}"
 	backendApiPath: 'infoLink-1.0/infolis-api'
 	mongoURI: "mongodb://#{process.env.MONGO_ADDR}:#{process.env.MONGO_PORT}/#{process.env.MONGO_DBNAME}"
+	mongoServerOptions:
+		server:
+			socketOptions:
+				keepAlive: 1
+				connectTimeoutMS: 60000
+			reconnectTries: 60
+			reconnectInterval: 4000
+
 
 # module.exports =
 #   basePath: ''
