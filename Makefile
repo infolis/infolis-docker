@@ -22,10 +22,24 @@ backup:
 		&& docker exec infolis-mongo mongodump --out /backup/$$now/mongodb \
 		&& cp -r data/uploads ./backup/$$now/uploads
 
+dropIndexes:
+	docker exec infolis-mongo mongo infolis-web --eval \
+	"db.getCollectionNames().forEach(function(col) { \
+		db.runCommand({'dropIndexes': col, 'index': '*'}); \
+	});"
+
+listIndexes:
+	docker exec infolis-mongo mongo infolis-web --eval \
+	"db.getCollectionNames().forEach(function(collection) { \
+		indexes = db[collection].getIndexes(); \
+		print('Indexes for ' + collection + ':'); \
+		printjson(indexes); \
+	});"
+
 restore:
 	@if [ -z "$$BACKUP" ];then echo "Usage: make restore BACKUP=<backup-timestamp>"; exit 1;fi
 	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
-	docker exec infolis-mongo mongorestore ./backup/$$BACKUP/mongodb
+	docker exec infolis-mongo mongorestore --noIndexRestore ./backup/$$BACKUP/mongodb
 	cp -v ./backup/$$BACKUP/uploads/* data/uploads
 
 clear:
