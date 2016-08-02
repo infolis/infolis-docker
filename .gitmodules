@@ -7,3 +7,6 @@
 [submodule "repo/infolis.github.io"]
 	path = repo/infolis.github.io
 	url = https://github.com/infolis/infolis.github.io
+[submodule "repo/dedup"]
+	path = repo/dedup
+	url = https://github.com/infolis/dedup
