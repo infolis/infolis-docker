@@ -1,4 +1,5 @@
 MKDIR = mkdir -p
+BACKUP_NAME := $(shell date +"%Y-%m-%d_%H-%M-%S")
 
 .PHONY: backup dirs
 
@@ -17,10 +18,14 @@ build: dirs
 
 backup:
 	$(MKDIR) backup
-	now=`date +"%Y-%m-%d_%H-%M-%S"` \
+	now="$(BACKUP_NAME)" \
 		&& $(MKDIR) backup/$$now/mongodb \
 		&& docker exec infolis-mongo mongodump --out /backup/$$now/mongodb \
 		&& cp -r data/uploads ./backup/$$now/uploads
+
+backup-to-server: backup
+	@if [ -z "$(BACKUP_SERVER)" ];then echo "Usage: make backup-to-server BACKUP_SERVER=user@server:/path"; exit 1;fi
+	rsync -Prz --progress backup/$(BACKUP_NAME) $(BACKUP_SERVER)
 
 dropIndexes:
 	docker exec infolis-mongo mongo infolis-web --eval \
@@ -43,7 +48,7 @@ restore:
 	cp -v ./backup/$$BACKUP/uploads/* data/uploads
 
 clear:
-	@echo -e "This will completely wipe all uploads and the DB.\n<CTRL-C> to cancel <Enter> to continue" \
+	@echo "This will completely wipe all uploads and the DB.\n<CTRL-C> to cancel <Enter> to continue" \
 		&& read confirm\
 		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()" \
 		&& rm -rvf data/uploads/*
