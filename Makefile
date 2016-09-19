@@ -26,6 +26,7 @@ backup:
 backup-to-server: backup
 	@if [ -z "$(BACKUP_SERVER)" ];then echo "Usage: make backup-to-server BACKUP_SERVER=user@server:/path"; exit 1;fi
 	rsync -Prz --progress backup/$(BACKUP_NAME) $(BACKUP_SERVER)
+	rm -rf $(BACKUP_NAME)
 
 dropIndexes:
 	docker exec infolis-mongo mongo infolis-web --eval \
@@ -44,12 +45,14 @@ listIndexes:
 restore:
 	@if [ -z "$$BACKUP" ];then echo "Usage: make restore BACKUP=<backup-timestamp>"; exit 1;fi
 	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
+	@if [ -e ./backup/$$BACKUP/uploads ];then cp -v ./backup/$$BACKUP/uploads/* data/uploads; fi
 	docker exec infolis-mongo mongorestore --noIndexRestore ./backup/$$BACKUP/mongodb
-	cp -v ./backup/$$BACKUP/uploads/* data/uploads
 
-clear:
-	@echo "This will completely wipe all uploads and the DB.\n<CTRL-C> to cancel <Enter> to continue" \
+clear-db:
+	@echo "This will completely wipe the DB.\n<CTRL-C> to cancel <Enter> to continue" \
 		&& read confirm\
-		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()" \
-		&& rm -rvf data/uploads/*
+		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()"
 
+clear-uploads:
+	@echo "This will completely wipe all uploads.\n<CTRL-C> to cancel <Enter> to continue" \
+		rm -rvf data/uploads/*
