@@ -16,14 +16,41 @@ build: dirs
 	docker-compose build infolis-web
 	docker-compose build infolink
 
-backup:
-	$(MKDIR) backup
-	now="$(BACKUP_NAME)" \
-		&& $(MKDIR) backup/$$now/mongodb \
-		&& docker exec infolis-mongo mongodump --out /backup/$$now/mongodb \
-		&& cp -r data/uploads ./backup/$$now/uploads
+#
+# Create backups
+#
 
-backup-to-server: backup
+backup: backup-files backup-mongodb
+
+backup-files:
+	$(MKDIR) backup/$($BACKUP_NAME)/mongodb
+	cp -r data/uploads ./backup/$$now/uploads
+
+backup-mongodb:
+	$(MKDIR) backup/$(BACKUP_NAME)/mongodb
+	docker exec infolis-mongo mongodump --out /backup/$(BACKUP_NAME)/mongodb \
+
+#
+# Restore backups
+#
+
+restore: restore-files restore-mongodb
+
+restore-files:
+	@if [ -z "$$BACKUP" ];then echo "Usage: make $@ BACKUP=<backup-timestamp>"; exit 1;fi
+	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
+	@if [ -e ./backup/$$BACKUP/uploads/* ];then cp -v ./backup/$$BACKUP/uploads/* data/uploads; fi
+
+restore-mongodb:
+	@if [ -z "$$BACKUP" ];then echo "Usage: make $@ BACKUP=<backup-timestamp>"; exit 1;fi
+	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
+	docker exec infolis-mongo mongorestore --noIndexRestore ./backup/$$BACKUP/mongodb
+
+#
+# Backup to server
+# - This only backs up the DB!
+#
+backup-to-server: backup-mongodb
 	@if [ -z "$(BACKUP_SERVER)" ];then echo "Usage: make backup-to-server BACKUP_SERVER=user@server:/path"; exit 1;fi
 	rsync -Prz --progress backup/$(BACKUP_NAME) $(BACKUP_SERVER)
 	rm -rf $(BACKUP_NAME)
@@ -41,12 +68,6 @@ listIndexes:
 		print('Indexes for ' + collection + ':'); \
 		printjson(indexes); \
 	});"
-
-restore:
-	@if [ -z "$$BACKUP" ];then echo "Usage: make restore BACKUP=<backup-timestamp>"; exit 1;fi
-	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
-	@if [ -e ./backup/$$BACKUP/uploads ];then cp -v ./backup/$$BACKUP/uploads/* data/uploads; fi
-	docker exec infolis-mongo mongorestore --noIndexRestore ./backup/$$BACKUP/mongodb
 
 clear-db:
 	@echo "This will completely wipe the DB.\n<CTRL-C> to cancel <Enter> to continue" \
