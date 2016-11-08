@@ -24,7 +24,7 @@ backup: backup-files backup-mongodb
 
 backup-files:
 	$(MKDIR) backup/$($BACKUP_NAME)/mongodb
-	cp -r data/uploads ./backup/$$now/uploads
+	cp -r data/uploads ./backup/$(BACKUP_NAME)/uploads
 
 backup-mongodb:
 	$(MKDIR) backup/$(BACKUP_NAME)/mongodb
