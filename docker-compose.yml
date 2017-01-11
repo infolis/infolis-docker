@@ -37,6 +37,7 @@ services:
       - './repo/infolis-web/public:/app/public'
       - './repo/infolis-web/views:/app/views'
       - './repo/infolis-web/src-client:/app/src-client'
+    command: 'npm run start-dev'
   infolink:
     build: 'repo/infolink'
     image: 'infolis/infolink'
