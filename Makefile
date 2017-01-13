@@ -23,7 +23,7 @@ build: dirs
 backup: backup-files backup-mongodb
 
 backup-files:
-	$(MKDIR) backup/$($BACKUP_NAME)/mongodb
+	$(MKDIR) backup/$(BACKUP_NAME)/uploads
 	cp -r data/uploads ./backup/$(BACKUP_NAME)/uploads
 
 backup-mongodb:
@@ -69,6 +69,8 @@ listIndexes:
 		printjson(indexes); \
 	});"
 
+clear: clear-db clear-uploads
+
 clear-db:
 	@echo "This will completely wipe the DB.\n<CTRL-C> to cancel <Enter> to continue" \
 		&& read confirm\
@@ -76,4 +78,5 @@ clear-db:
 
 clear-uploads:
 	@echo "This will completely wipe all uploads.\n<CTRL-C> to cancel <Enter> to continue" \
-		rm -rvf data/uploads/*
+		&& read confirm\
+		&& rm -rvf data/uploads/*
