@@ -138,12 +138,18 @@ some utility targets.
 a snapshot of the Mongo DB (using `mongodump`) and a copy of the
 uploaded files.
 
+Subtargets: `backup-mongodb`, `backup-files`
+
 ### `make restore`
 
 `make restore BACKUP=<timestamp>` will restore MongoDB documents and
 uploads from the backup `./backup/<timestamp>`.
 
+Subtargets: `restore-mongodb`, `restore-files`
+
 ### `make clear`
 
 `make clear` will drop the database and remove all files. Use with
 caution, obviously.
+
+Subtargets: `clear-mongodb`, `clear-files`

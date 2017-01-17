@@ -1,17 +1,27 @@
 MKDIR = mkdir -p
-BACKUP_NAME := $(shell date +"%Y-%m-%d_%H-%M-%S")
+COPY_TO    = cp -vt
+
+DATA_PATH       = data
+BACKUP         := $(shell date +"%Y-%m-%d_%H-%M-%S")
+BACKUP_PATH     = backup/$(BACKUP)
+MONGODB_DATA    = $(DATA_PATH)/mongodb
+UPLOADS_DATA    = $(DATA_PATH)/uploads
+MONGODB_BACKUP  = $(BACKUP_PATH)/mongodb
+UPLOADS_BACKUP  = $(BACKUP_PATH)/uploads
+
+help:
+	@echo "See README.md#utilities"
 
 .PHONY: backup dirs
 
 dirs:
 	mkdir -p \
-		./data/logs/ \
-		./data/mongodb/ \
-		./data/uploads/ \
-		./backup/
+		$(DATA_PATH)/logs/ \
+		$(DATA_PATH)/mongodb/ \
+		$(DATA_PATH)/uploads/ \
+		$(dir BACKUP_PATH)
 
 build: dirs
-	$(MKDIR) data/logs data/mongodb data/uploads
 	docker-compose pull mongo
 	docker-compose build infolis-web
 	docker-compose build infolink
@@ -23,12 +33,12 @@ build: dirs
 backup: backup-files backup-mongodb
 
 backup-files:
-	$(MKDIR) backup/$(BACKUP_NAME)/uploads
-	cp -r data/uploads ./backup/$(BACKUP_NAME)
+	$(MKDIR) $(UPLOADS_BACKUP)
+	find $(UPLOADS_DATA) -type f -exec $(COPY_TO) "$(UPLOADS_BACKUP)" {} \;
 
 backup-mongodb:
-	$(MKDIR) backup/$(BACKUP_NAME)/mongodb
-	docker exec infolis-mongo mongodump --out /backup/$(BACKUP_NAME)/mongodb \
+	$(MKDIR) $(MONGODB_BACKUP)
+	docker exec infolis-mongo mongodump --out $(MONGODB_BACKUP)
 
 #
 # Restore backups
@@ -37,23 +47,38 @@ backup-mongodb:
 restore: restore-files restore-mongodb
 
 restore-files:
-	@if [ -z "$$BACKUP" ];then echo "Usage: make $@ BACKUP=<backup-timestamp>"; exit 1;fi
-	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
-	@if [ -e ./backup/$$BACKUP/uploads/* ];then cp -v ./backup/$$BACKUP/uploads/* data/uploads; fi
+	@if [ ! -e "$(UPLOADS_BACKUP)" ];then echo "No such folder $(UPLOADS_BACKUP)\nUsage: make $@ BACKUP=<backup-timestamp>" ; exit 2 ;fi
+	find "$(UPLOADS_BACKUP)" -type f -exec $(COPY_TO) "$(UPLOADS_DATA)" {} \;
 
-restore-mongodb:
-	@if [ -z "$$BACKUP" ];then echo "Usage: make $@ BACKUP=<backup-timestamp>"; exit 1;fi
-	@if [ ! -e "./backup/$$BACKUP" ];then echo "No such folder ./backup/$$BACKUP"; exit 2;fi
-	docker exec infolis-mongo mongorestore --noIndexRestore ./backup/$$BACKUP/mongodb
+restore-mongodb: dropIndexes
+	@if [ ! -e "$(MONGODB_BACKUP)" ];then echo "No such folder $(MONGODB_BACKUP)\nUsage: make $@ BACKUP=<backup-timestamp>" ; exit 2 ;fi
+	docker exec infolis-mongo mongorestore --noIndexRestore $(MONGODB_BACKUP)
 
 #
+# Delete database or remove uploads
+#
+
+clear: clear-mongodb clear-files
+
+clear-mongodb:
+	@echo "This will completely wipe the DB.\n<CTRL-C> to cancel <Enter> to continue" \
+		&& read confirm\
+		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()"
+
+clear-files:
+	@echo "This will completely wipe all files.\n<CTRL-C> to cancel <Enter> to continue" \
+		&& read confirm\
+		&& find "$(UPLOADS_DATA)" -type f -exec rm {} \;
+
+#
+# XXX Disabled for now, cronjob not active anyway
 # Backup to server
 # - This only backs up the DB!
 #
-backup-to-server: backup-mongodb
-	@if [ -z "$(BACKUP_SERVER)" ];then echo "Usage: make backup-to-server BACKUP_SERVER=user@server:/path"; exit 1;fi
-	rsync -Prz --progress backup/$(BACKUP_NAME) $(BACKUP_SERVER)
-	rm -rf $(BACKUP_NAME)
+# backup-to-server: backup-mongodb
+#     @if [ -z "$(BACKUP_SERVER)" ];then echo "Usage: make backup-to-server BACKUP_SERVER=user@server:/path"; exit 1;fi
+#     rsync -Prz --progress backup/$(BACKUP) $(BACKUP_SERVER)
+#     # rm -rf "$(BACKUP)"
 
 dropIndexes:
 	docker exec infolis-mongo mongo infolis-web --eval \
@@ -68,15 +93,3 @@ listIndexes:
 		print('Indexes for ' + collection + ':'); \
 		printjson(indexes); \
 	});"
-
-clear: clear-db clear-uploads
-
-clear-db:
-	@echo "This will completely wipe the DB.\n<CTRL-C> to cancel <Enter> to continue" \
-		&& read confirm\
-		&& docker exec infolis-mongo mongo infolis-web --eval "db.dropDatabase()"
-
-clear-uploads:
-	@echo "This will completely wipe all uploads.\n<CTRL-C> to cancel <Enter> to continue" \
-		&& read confirm\
-		&& rm -rvf data/uploads/*
