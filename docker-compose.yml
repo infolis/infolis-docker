@@ -43,7 +43,7 @@ services:
     image: 'infolis/infolink'
     container_name: 'infolink-app'
     tmpfs:
-      - '/tmp/infolis:size=1G'
+      - '/tmp/infolis:size=100G'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - './config/infolink.properties:/etc/infolis-config.properties'
