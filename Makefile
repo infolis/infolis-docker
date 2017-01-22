@@ -68,7 +68,7 @@ clear-mongodb:
 clear-files:
 	@echo "This will completely wipe all files.\n<CTRL-C> to cancel <Enter> to continue" \
 		&& read confirm\
-		&& find "$(UPLOADS_DATA)" -type f -exec rm {} \;
+		&& find "$(UPLOADS_DATA)" -type f -exec rm -f {} \;
 
 #
 # XXX Disabled for now, cronjob not active anyway
